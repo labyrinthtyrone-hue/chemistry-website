@@ -842,4 +842,898 @@
             }
             
             .input-group {
-                mi
+                min-width: 100%;
+            }
+        }
+    </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="https://cdn.tailwindcss.com" type="text/javascript"></script>
+ </head>
+ <body><!-- Navigation -->
+  <nav class="navbar">
+   <div class="nav-container"><a href="#" class="logo" id="site-title">StoichBot</a>
+    <ul class="nav-links">
+     <li><a href="#home">Home</a></li>
+     <li><a href="#features">Features</a></li>
+     <li><a href="#about">About</a></li>
+    </ul><button class="chat-toggle-btn" onclick="openChat()">💬 Start Learning</button>
+   </div>
+  </nav><!-- Hero Section -->
+  <section class="hero" id="home">
+   <div class="hero-content">
+    <h1 id="hero-title">Master Chemistry with StoichBot</h1>
+    <p id="hero-subtitle">Your AI-powered chemistry tutor specialized in stoichiometry. Learn, practice, and excel with personalized guidance!</p>
+    <div class="hero-buttons"><button class="btn btn-primary" onclick="openChat()">🚀 Start Learning Now</button> <a href="#features" class="btn btn-secondary">📚 Explore Features</a>
+    </div>
+   </div>
+  </section><!-- Features Section -->
+  <section class="features" id="features">
+   <div class="features-container">
+    <h2>Why Choose StoichBot?</h2>
+    <div class="features-grid">
+     <div class="feature-card">
+      <div class="feature-icon">
+       🤖
+      </div>
+      <h3>AI-Powered Tutoring</h3>
+      <p>Get personalized explanations adapted to your age and learning level. Our AI understands your needs and adjusts accordingly.</p>
+     </div>
+     <div class="feature-card">
+      <div class="feature-icon">
+       ⚖️
+      </div>
+      <h3>Equation Balancer</h3>
+      <p>Interactive calculator that balances chemical equations step-by-step with detailed explanations of the process.</p>
+     </div>
+     <div class="feature-card">
+      <div class="feature-icon">
+       🎯
+      </div>
+      <h3>Practice Quizzes</h3>
+      <p>Test your knowledge with customizable quizzes. Choose difficulty levels and track your progress over time.</p>
+     </div>
+     <div class="feature-card">
+      <div class="feature-icon">
+       📊
+      </div>
+      <h3>Problem Solving</h3>
+      <p>Step-by-step solutions for stoichiometry problems with clear explanations and calculation methods.</p>
+     </div>
+     <div class="feature-card">
+      <div class="feature-icon">
+       🔬
+      </div>
+      <h3>Concept Mastery</h3>
+      <p>Deep dive into mole concepts, limiting reactants, percent yield, and all essential stoichiometry topics.</p>
+     </div>
+     <div class="feature-card">
+      <div class="feature-icon">
+       💾
+      </div>
+      <h3>Progress Tracking</h3>
+      <p>Your conversations and progress are saved automatically. Pick up where you left off anytime!</p>
+     </div>
+    </div>
+   </div>
+  </section><!-- Chat Overlay -->
+  <div class="chat-overlay" id="chatOverlay">
+   <div class="chat-container">
+    <div class="welcome-screen" id="welcomeScreen">
+     <div class="welcome-card">
+      <h2>👋 Welcome to StoichBot!</h2>
+      <p>I'm your personal chemistry assistant, specialized in stoichiometry. Let's get to know each other first!</p>
+      <form class="welcome-form" onsubmit="startChat(event)">
+       <div class="form-group"><label for="nickname">What should I call you?</label> <input type="text" id="nickname" class="form-input" placeholder="Enter your nickname" required>
+       </div>
+       <div class="form-group"><label>What's your age group?</label>
+        <div class="age-selector">
+         <div class="age-option" onclick="selectAge('13-15', this)">
+          13-15 years
+         </div>
+         <div class="age-option" onclick="selectAge('16-18', this)">
+          16-18 years
+         </div>
+         <div class="age-option" onclick="selectAge('19-21', this)">
+          19-21 years
+         </div>
+         <div class="age-option" onclick="selectAge('22+', this)">
+          22+ years
+         </div>
+        </div><input type="hidden" id="selectedAge" required>
+       </div><button type="submit" class="start-btn" id="startBtn" disabled> 🚀 Start Learning Chemistry! </button>
+      </form>
+     </div>
+    </div>
+    <div class="chat-header">
+     <h3 id="chatbot-name">StoichBot - Your Chemistry Assistant</h3><button class="close-chat" onclick="closeChat()">×</button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+     <div class="typing-indicator" id="typingIndicator">
+      <div class="typing-dots">
+       <div class="typing-dot"></div>
+       <div class="typing-dot"></div>
+       <div class="typing-dot"></div>
+      </div>
+     </div>
+    </div>
+    <div class="quick-actions">
+     <h4>Quick Actions</h4>
+     <div class="action-buttons"><button class="action-btn" onclick="sendQuickMessage('What is stoichiometry?')">🧪 Stoichiometry Basics</button> <button class="action-btn" onclick="sendQuickMessage('Help me balance equations')">⚖️ Balance Equations</button> <button class="action-btn" onclick="sendQuickMessage('Solve stoichiometry problem')">🧮 Problem Solving</button> <button class="action-btn" onclick="sendQuickMessage('Start quiz')">🎯 Take Quiz</button> <button class="action-btn" onclick="sendQuickMessage('Explain limiting reactants')">🔬 Limiting Reactants</button>
+     </div>
+    </div>
+    <div class="chat-input">
+     <div class="input-container"><textarea id="messageInput" class="input-field" placeholder="Ask me anything about stoichiometry..." rows="1" onkeypress="handleKeyPress(event)" oninput="adjustTextareaHeight(this)"></textarea> <button class="send-btn" id="sendBtn" onclick="sendMessage()"> ➤ </button>
+     </div>
+    </div>
+   </div>
+  </div>
+  <script>
+        let currentLanguage = 'en';
+        let chatHistory = [];
+        let isLoading = false;
+        let userProfile = {
+            nickname: '',
+            age: '',
+            isSetup: false
+        };
+        
+        const defaultConfig = {
+            site_title: 'StoichBot',
+            hero_title: 'Master Chemistry with StoichBot',
+            hero_subtitle: 'Your AI-powered chemistry tutor specialized in stoichiometry. Learn, practice, and excel with personalized guidance!',
+            chatbot_name: 'StoichBot',
+            welcome_message: 'Hello! I\'m your chemistry assistant specialized in stoichiometry. How can I help you today?',
+            primary_color: '#007bff',
+            surface_color: '#ffffff'
+        };
+
+        // Stoichiometry-related keywords for scope checking
+        const stoichiometryKeywords = [
+            'mole', 'mol', 'stoichiometry', 'stoichiometric', 'avogadro', 'balance', 'equation', 'chemical',
+            'reaction', 'reactant', 'product', 'limiting', 'excess', 'yield', 'percent', 'theoretical',
+            'actual', 'mass', 'molecular', 'atomic', 'formula', 'empirical', 'compound', 'element',
+            'coefficient', 'ratio', 'proportion', 'calculate', 'conversion', 'gram', 'kilogram',
+            'molecule', 'atom', 'ion', 'chemistry', 'periodic', 'table', 'concentration', 'molarity',
+            'solution', 'solute', 'solvent', 'gas', 'stp', 'volume', 'pressure', 'temperature'
+        ];
+
+        const dataHandler = {
+            onDataChanged(data) {
+                chatHistory = data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+                renderChatHistory();
+            }
+        };
+
+        const elementHandler = {
+            defaultConfig: defaultConfig,
+            onConfigChange: async (config) => {
+                document.getElementById('site-title').textContent = config.site_title || defaultConfig.site_title;
+                document.getElementById('hero-title').textContent = config.hero_title || defaultConfig.hero_title;
+                document.getElementById('hero-subtitle').textContent = config.hero_subtitle || defaultConfig.hero_subtitle;
+                document.getElementById('chatbot-name').textContent = config.chatbot_name || defaultConfig.chatbot_name;
+                
+                const primaryColor = config.primary_color || defaultConfig.primary_color;
+                const surfaceColor = config.surface_color || defaultConfig.surface_color;
+                
+                document.documentElement.style.setProperty('--primary-color', primaryColor);
+                document.documentElement.style.setProperty('--surface-color', surfaceColor);
+                
+                const buttons = document.querySelectorAll('.btn-primary, .chat-toggle-btn, .send-btn, .start-btn');
+                buttons.forEach(btn => {
+                    btn.style.backgroundColor = primaryColor;
+                });
+                
+                const userMessages = document.querySelectorAll('.message.user .message-content');
+                userMessages.forEach(msg => {
+                    msg.style.backgroundColor = primaryColor;
+                });
+            },
+            mapToCapabilities: (config) => ({
+                recolorables: [
+                    {
+                        get: () => config.primary_color || defaultConfig.primary_color,
+                        set: (value) => {
+                            config.primary_color = value;
+                            window.elementSdk.setConfig({ primary_color: value });
+                        }
+                    },
+                    {
+                        get: () => config.surface_color || defaultConfig.surface_color,
+                        set: (value) => {
+                            config.surface_color = value;
+                            window.elementSdk.setConfig({ surface_color: value });
+                        }
+                    }
+                ],
+                borderables: [],
+                fontEditable: undefined,
+                fontSizeable: undefined
+            }),
+            mapToEditPanelValues: (config) => new Map([
+                ['site_title', config.site_title || defaultConfig.site_title],
+                ['hero_title', config.hero_title || defaultConfig.hero_title],
+                ['hero_subtitle', config.hero_subtitle || defaultConfig.hero_subtitle],
+                ['chatbot_name', config.chatbot_name || defaultConfig.chatbot_name],
+                ['welcome_message', config.welcome_message || defaultConfig.welcome_message]
+            ])
+        };
+
+        async function initializeApp() {
+            if (window.dataSdk) {
+                const result = await window.dataSdk.init(dataHandler);
+                if (!result.isOk) {
+                    console.error('Failed to initialize data SDK');
+                }
+            }
+
+            if (window.elementSdk) {
+                await window.elementSdk.init(elementHandler);
+            }
+        }
+
+        function openChat() {
+            document.getElementById('chatOverlay').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeChat() {
+            document.getElementById('chatOverlay').style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+
+        function selectAge(age, element) {
+            document.querySelectorAll('.age-option').forEach(opt => opt.classList.remove('selected'));
+            element.classList.add('selected');
+            document.getElementById('selectedAge').value = age;
+            
+            const nickname = document.getElementById('nickname').value.trim();
+            document.getElementById('startBtn').disabled = !nickname;
+        }
+
+        function startChat(event) {
+            event.preventDefault();
+            
+            const nickname = document.getElementById('nickname').value.trim();
+            const age = document.getElementById('selectedAge').value;
+            
+            if (!nickname || !age) return;
+            
+            userProfile = {
+                nickname: nickname,
+                age: age,
+                isSetup: true
+            };
+            
+            document.getElementById('welcomeScreen').style.display = 'none';
+            showPersonalizedWelcome();
+        }
+
+        function showPersonalizedWelcome() {
+            const config = window.elementSdk?.config || defaultConfig;
+            const botName = config.chatbot_name || defaultConfig.chatbot_name;
+            
+            let welcomeMsg = `Hi ${userProfile.nickname}! 👋 I'm ${botName}, your personal chemistry assistant! `;
+            
+            if (userProfile.age === '13-15') {
+                welcomeMsg += `I'll explain things in a simple and fun way that's perfect for your grade level. Ready to explore the amazing world of stoichiometry together? 🧪✨`;
+            } else if (userProfile.age === '16-18') {
+                welcomeMsg += `I'll help you master stoichiometry concepts for your senior high school chemistry. Let's tackle those challenging problems step by step! 📚🔬`;
+            } else if (userProfile.age === '19-21') {
+                welcomeMsg += `Perfect! I'll provide detailed explanations suitable for college-level chemistry. Ready to dive deep into stoichiometric calculations? 🎓⚗️`;
+            } else {
+                welcomeMsg += `Great to meet you! I'll provide comprehensive explanations and advanced problem-solving techniques. Let's explore stoichiometry together! 🔬📊`;
+            }
+            
+            addMessage(welcomeMsg, 'bot');
+        }
+
+        function isRelatedToStoichiometry(message) {
+            const lowerMessage = message.toLowerCase();
+            
+            const enhancedKeywords = [
+                ...stoichiometryKeywords,
+                'what is', 'explain', 'how to', 'help me', 'teach me', 'show me',
+                'calculate', 'solve', 'find', 'determine', 'compute',
+                'quiz', 'test', 'exam', 'question', 'practice',
+                'balance', 'equation', 'reaction', 'formula',
+                'mass', 'weight', 'gram', 'kg', 'pound',
+                'percent', 'percentage', 'yield', 'efficiency',
+                'limiting', 'excess', 'leftover', 'remaining',
+                'avogadro', 'number', 'constant', '6.022',
+                'molecular', 'atomic', 'molar', 'molarity',
+                'concentration', 'solution', 'mixture',
+                'gas', 'liquid', 'solid', 'state', 'phase',
+                'temperature', 'pressure', 'volume', 'stp',
+                'periodic', 'table', 'element', 'compound',
+                'ion', 'ionic', 'covalent', 'bond',
+                'coefficient', 'subscript', 'superscript',
+                'reactant', 'product', 'catalyst', 'inhibitor'
+            ];
+            
+            const hasChemKeywords = enhancedKeywords.some(keyword => lowerMessage.includes(keyword));
+            
+            const questionPatterns = [
+                /what.*is.*\b(mol|atom|molecule|element|compound|reaction|equation|balance|mass|weight|formula|chemical|chemistry|stoich)/i,
+                /how.*to.*\b(calculate|solve|find|balance|determine|compute)/i,
+                /explain.*\b(mol|atom|molecule|element|compound|reaction|equation|balance|mass|weight|formula|chemical|chemistry|stoich)/i,
+                /help.*me.*\b(with|understand|learn|solve|calculate|balance)/i,
+                /\b(quiz|test|practice|exam).*\b(chemistry|chemical|stoich|mol|equation|balance)/i,
+                /\b(chemistry|chemical|stoich|mol|equation|balance).*\b(quiz|test|practice|exam)/i
+            ];
+            
+            const hasQuestionPattern = questionPatterns.some(pattern => pattern.test(lowerMessage));
+            
+            return hasChemKeywords || hasQuestionPattern;
+        }
+
+        function addMessage(content, sender, messageType = 'text') {
+            const messageData = {
+                id: Date.now().toString(),
+                message: content,
+                sender: sender,
+                timestamp: new Date().toISOString(),
+                messageType: messageType,
+                userNickname: userProfile.nickname || '',
+                userAge: userProfile.age || ''
+            };
+
+            if (window.dataSdk && chatHistory.length < 999) {
+                window.dataSdk.create(messageData);
+            } else if (chatHistory.length >= 999) {
+                showMessage('Chat history limit reached. Please refresh to continue.', 'system');
+            } else {
+                chatHistory.push(messageData);
+                renderChatHistory();
+            }
+        }
+
+        function renderChatHistory() {
+            const messagesContainer = document.getElementById('chatMessages');
+            const typingIndicator = document.getElementById('typingIndicator');
+            
+            messagesContainer.innerHTML = '';
+            messagesContainer.appendChild(typingIndicator);
+
+            chatHistory.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${msg.sender}`;
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = 'message-content';
+                
+                if (msg.messageType === 'quiz') {
+                    contentDiv.innerHTML = msg.message;
+                } else {
+                    contentDiv.textContent = msg.message;
+                }
+                
+                messageDiv.appendChild(contentDiv);
+                messagesContainer.appendChild(messageDiv);
+            });
+
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function showTyping() {
+            document.getElementById('typingIndicator').style.display = 'block';
+            const messagesContainer = document.getElementById('chatMessages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function hideTyping() {
+            document.getElementById('typingIndicator').style.display = 'none';
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message || isLoading) return;
+
+            if (!userProfile.isSetup) {
+                addMessage("Please complete the welcome form first to start our conversation! 😊", 'bot');
+                return;
+            }
+
+            isLoading = true;
+            document.getElementById('sendBtn').disabled = true;
+            
+            addMessage(message, 'user');
+            input.value = '';
+            adjustTextareaHeight(input);
+
+            showTyping();
+            
+            setTimeout(() => {
+                const response = generateBotResponse(message);
+                hideTyping();
+                addMessage(response.content, 'bot', response.type);
+                
+                isLoading = false;
+                document.getElementById('sendBtn').disabled = false;
+            }, 1500);
+        }
+
+        function sendQuickMessage(message) {
+            document.getElementById('messageInput').value = message;
+            sendMessage();
+        }
+
+        function generateBotResponse(userMessage) {
+            const msg = userMessage.toLowerCase();
+            const nickname = userProfile.nickname;
+            const age = userProfile.age;
+            
+            if (!isRelatedToStoichiometry(userMessage)) {
+                return {
+                    type: 'text',
+                    content: `I'm sorry ${nickname}, but your question seems to be outside my area of expertise. I'm specifically designed to help with stoichiometry and chemistry-related topics! 🧪
+
+I'd love to help you with questions about:
+• Mole concept and calculations
+• Balancing chemical equations  
+• Stoichiometric problem solving
+• Limiting reactants and excess reactants
+• Percent yield calculations
+• Mass-to-mass conversions
+• Molecular and empirical formulas
+
+What would you like to learn about in chemistry today? 😊`
+                };
+            }
+            
+            const quizPatterns = [
+                /\b(quiz|test|exam|practice|question)\b/i,
+                /take.*\b(quiz|test|exam)\b/i,
+                /start.*\b(quiz|test|exam)\b/i,
+                /give.*me.*\b(quiz|test|question)\b/i,
+                /i.*want.*\b(quiz|test|practice)\b/i,
+                /can.*i.*\b(take|have|get).*\b(quiz|test)\b/i
+            ];
+            
+            const isQuizRequest = quizPatterns.some(pattern => pattern.test(msg));
+            
+            if (isQuizRequest) {
+                return {
+                    type: 'quiz',
+                    content: generateQuizSelector()
+                };
+            }
+            
+            const calculatorPatterns = [
+                /calculator/i,
+                /calc/i
+            ];
+            
+            const hasCalculatorKeyword = calculatorPatterns.some(pattern => pattern.test(msg));
+            
+            const balancePatterns = [
+                /\b(balance|balancing)\b.*\b(equation|reaction|formula)\b/i,
+                /\b(equation|reaction|formula)\b.*\b(balance|balancing)\b/i,
+                /help.*me.*balance/i,
+                /how.*to.*balance/i,
+                /balance.*chemical/i,
+                /chemical.*balance/i,
+                /balance.*equations/i,
+                /equation.*balancer/i
+            ];
+            
+            const hasBalanceKeywords = balancePatterns.some(pattern => pattern.test(msg)) || 
+                                     (msg.includes('balance') && (msg.includes('equation') || msg.includes('equations'))) ||
+                                     msg.includes('help me balance') ||
+                                     msg.toLowerCase().includes('balance equations') ||
+                                     msg.toLowerCase() === 'balance equations' ||
+                                     msg.toLowerCase().includes('equation balancer') ||
+                                     msg.toLowerCase().includes('chemical balancer');
+            
+            const wasBalanceButtonClicked = window.balanceEquationRequested || false;
+            
+            if (wasBalanceButtonClicked && hasCalculatorKeyword) {
+                window.balanceEquationRequested = false;
+                return {
+                    type: 'quiz',
+                    content: generateBalanceCalculator()
+                };
+            }
+            
+            if (hasBalanceKeywords) {
+                window.balanceEquationRequested = true;
+                return {
+                    type: 'text',
+                    content: `I can help you balance equations, ${nickname}! 🧪\n\nTo use my interactive equation balancer calculator, please type "calculator" and I'll open it for you.\n\nOr I can explain the balancing process step by step. What would you prefer?`
+                };
+            }
+            
+            if (hasCalculatorKeyword && !wasBalanceButtonClicked) {
+                return {
+                    type: 'text',
+                    content: `I have a calculator feature! 🧮\n\nCurrently, I can help you with:\n• Chemical equation balancing calculator\n\nTo use the equation balancer, first click "⚖️ Balance Equations" or ask me about balancing equations, then type "calculator".\n\nWhat would you like to calculate today?`
+                };
+            }
+            
+            const stoichConceptPatterns = [
+                /what.*is.*stoich/i,
+                /explain.*stoich/i,
+                /stoich.*basic/i,
+                /basic.*stoich/i,
+                /define.*stoich/i,
+                /meaning.*stoich/i,
+                /stoich.*mean/i
+            ];
+            
+            const isStoichConcept = stoichConceptPatterns.some(pattern => pattern.test(msg)) ||
+                                  msg.includes('what is stoichiometry') || 
+                                  msg.includes('stoichiometry basics');
+            
+            if (isStoichConcept) {
+                let explanation = `Great question, ${nickname}! 🧪 Stoichiometry is like the "recipe math" of chemistry!\n\n`;
+                
+                if (age === '13-15') {
+                    explanation += `Think of it like baking cookies 🍪:\n• If 1 cup of flour makes 12 cookies\n• Then 2 cups of flour makes 24 cookies\n\nStoichiometry works the same way with chemical reactions! It helps us figure out how much of each chemical we need, or how much product we'll get.\n\nKey ideas:\n🔹 Chemical equations are like recipes\n🔹 We use ratios to calculate amounts\n🔹 Everything must be balanced (like a balanced meal!)`;
+                } else if (age === '16-18') {
+                    explanation += `Stoichiometry is the quantitative study of chemical reactions. It's based on the law of conservation of mass - matter cannot be created or destroyed.\n\nCore concepts:\n🔹 Balanced chemical equations show exact ratios\n🔹 Mole ratios from coefficients guide calculations\n🔹 Convert between grams, moles, and molecules\n🔹 Predict amounts of reactants needed or products formed\n\nExample: 2H₂ + O₂ → 2H₂O\nThis tells us 2 moles H₂ react with 1 mole O₂ to make 2 moles H₂O`;
+                } else {
+                    explanation += `Stoichiometry is the quantitative relationship between reactants and products in chemical reactions, governed by conservation laws.\n\nFundamental principles:\n🔹 Conservation of mass and atoms\n🔹 Definite proportions in chemical compounds\n🔹 Mole concept as the bridge between atomic and macroscopic scales\n🔹 Stoichiometric coefficients define molar ratios\n\nApplications include:\n• Industrial process optimization\n• Environmental impact calculations\n• Pharmaceutical dosage determinations\n• Materials science applications`;
+                }
+                
+                return { type: 'text', content: explanation };
+            }
+            
+            return {
+                type: 'text',
+                content: `I understand you're asking about stoichiometry, ${nickname}! 🧪 I can help you with:\n\n• **Mole concept** and Avogadro's number\n• **Balancing chemical equations** step by step\n• **Problem-solving** with detailed explanations\n• **Mass-to-mass conversions** and calculations\n• **Limiting reactants** and excess reactants\n• **Percent yield** calculations\n• **Practice quizzes** to test your knowledge\n\nCould you be more specific about what you'd like to learn? I'm here to help make chemistry easier for you! 😊`
+            };
+        }
+
+        function generateQuizSelector() {
+            const selectorId = Date.now();
+            
+            return `
+                <div class="quiz-selector-container">
+                    <div class="quiz-selector-header">
+                        <h3>🎯 Choose Your Quiz Settings</h3>
+                        <p>Select difficulty level and number of questions:</p>
+                    </div>
+                    
+                    <div class="quiz-settings">
+                        <div class="setting-group">
+                            <label>Difficulty Level:</label>
+                            <div class="difficulty-options">
+                                <button class="difficulty-btn" onclick="selectDifficulty('easy', this, ${selectorId})">📚 Easy</button>
+                                <button class="difficulty-btn" onclick="selectDifficulty('normal', this, ${selectorId})">🧪 Normal</button>
+                                <button class="difficulty-btn" onclick="selectDifficulty('hard', this, ${selectorId})">🔬 Hard</button>
+                                <button class="difficulty-btn" onclick="selectDifficulty('extreme', this, ${selectorId})">⚗️ Extreme</button>
+                            </div>
+                        </div>
+                        
+                        <div class="setting-group">
+                            <label>Number of Questions:</label>
+                            <div class="question-count-options">
+                                <button class="count-btn" onclick="selectQuestionCount(5, this, ${selectorId})">5 Questions</button>
+                                <button class="count-btn" onclick="selectQuestionCount(10, this, ${selectorId})">10 Questions</button>
+                                <button class="count-btn" onclick="selectQuestionCount(15, this, ${selectorId})">15 Questions</button>
+                                <button class="count-btn" onclick="selectQuestionCount(20, this, ${selectorId})">20 Questions</button>
+                            </div>
+                        </div>
+                        
+                        <button class="start-quiz-btn" id="startQuizBtn${selectorId}" onclick="startCustomQuiz(${selectorId})" disabled>
+                            🚀 Start Quiz
+                        </button>
+                    </div>
+                    
+                    <input type="hidden" id="selectedDifficulty${selectorId}">
+                    <input type="hidden" id="selectedCount${selectorId}">
+                </div>
+            `;
+        }
+
+        function generateBalanceCalculator() {
+            const calcId = Date.now();
+            
+            return `
+                <div class="balance-calculator-container">
+                    <div class="calculator-header">
+                        <h3>⚖️ Chemical Equation Balancer</h3>
+                        <p>Enter your chemical equation and I'll balance it for you!</p>
+                    </div>
+                    
+                    <div class="equation-input-section">
+                        <div class="input-group">
+                            <label>Reactants (left side):</label>
+                            <input type="text" id="reactants${calcId}" class="equation-input" placeholder="e.g., H2 + O2" />
+                        </div>
+                        
+                        <div class="arrow-symbol">→</div>
+                        
+                        <div class="input-group">
+                            <label>Products (right side):</label>
+                            <input type="text" id="products${calcId}" class="equation-input" placeholder="e.g., H2O" />
+                        </div>
+                    </div>
+                    
+                    <div class="calculator-buttons">
+                        <button class="balance-btn" onclick="balanceEquation(${calcId})">⚖️ Balance Equation</button>
+                        <button class="clear-btn" onclick="clearCalculator(${calcId})">🗑️ Clear</button>
+                    </div>
+                    
+                    <div class="result-section" id="balanceResult${calcId}" style="display: none;">
+                        <div class="balanced-equation" id="balancedEq${calcId}"></div>
+                        <div class="explanation" id="explanation${calcId}"></div>
+                    </div>
+                    
+                    <div class="calculator-help">
+                        <h4>💡 How to use:</h4>
+                        <ul>
+                            <li>Use element symbols (H, O, C, N, etc.)</li>
+                            <li>Use numbers for subscripts (H2O, CO2)</li>
+                            <li>Separate compounds with + (plus sign)</li>
+                            <li>Example: "C + O2" → "CO2"</li>
+                        </ul>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Balance calculator functions
+        function balanceEquation(calcId) {
+            const reactants = document.getElementById(`reactants${calcId}`).value.trim();
+            const products = document.getElementById(`products${calcId}`).value.trim();
+            
+            if (!reactants || !products) {
+                document.getElementById(`balanceResult${calcId}`).innerHTML = `
+                    <div class="error-message">⚠️ Please enter both reactants and products!</div>
+                `;
+                document.getElementById(`balanceResult${calcId}`).style.display = 'block';
+                return;
+            }
+            
+            const balancedResult = performBalancing(reactants, products);
+            
+            document.getElementById(`balancedEq${calcId}`).innerHTML = `
+                <div class="balanced-result">
+                    <h4>✅ Balanced Equation:</h4>
+                    <div class="equation-display">${balancedResult.equation}</div>
+                </div>
+            `;
+            
+            document.getElementById(`explanation${calcId}`).innerHTML = `
+                <div class="balance-explanation">
+                    <h4>📝 Explanation:</h4>
+                    <p>${balancedResult.explanation}</p>
+                    <div class="steps">
+                        <h5>Steps taken:</h5>
+                        <ol>
+                            ${balancedResult.steps.map(step => `<li>${step}</li>`).join('')}
+                        </ol>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById(`balanceResult${calcId}`).style.display = 'block';
+        }
+
+        function clearCalculator(calcId) {
+            document.getElementById(`reactants${calcId}`).value = '';
+            document.getElementById(`products${calcId}`).value = '';
+            document.getElementById(`balanceResult${calcId}`).style.display = 'none';
+        }
+
+        function performBalancing(reactants, products) {
+            const input = `${reactants} → ${products}`.toLowerCase();
+            
+            const commonEquations = {
+                'h2 + o2 → h2o': {
+                    equation: '2H₂ + O₂ → 2H₂O',
+                    explanation: 'This is the formation of water. We need 2 molecules of hydrogen to react with 1 molecule of oxygen to form 2 molecules of water.',
+                    steps: [
+                        'Count atoms: Left side has 2H and 2O, right side has 2H and 1O',
+                        'Balance oxygen by adding coefficient 2 to H₂O',
+                        'Balance hydrogen by adding coefficient 2 to H₂',
+                        'Final check: 4H and 2O on both sides ✓'
+                    ]
+                },
+                'c + o2 → co2': {
+                    equation: 'C + O₂ → CO₂',
+                    explanation: 'This equation is already balanced! Each side has 1 carbon atom and 2 oxygen atoms.',
+                    steps: [
+                        'Count atoms: Left side has 1C and 2O',
+                        'Right side has 1C and 2O',
+                        'The equation is already balanced!'
+                    ]
+                },
+                'ch4 + o2 → co2 + h2o': {
+                    equation: 'CH₄ + 2O₂ → CO₂ + 2H₂O',
+                    explanation: 'Methane combustion. We balance carbon first, then hydrogen, and finally oxygen.',
+                    steps: [
+                        'Balance carbon: 1C on each side ✓',
+                        'Balance hydrogen: 4H on left, need 2H₂O on right',
+                        'Balance oxygen: Need 2O₂ on left to provide 4O total',
+                        'Final check: 1C, 4H, 4O on both sides ✓'
+                    ]
+                }
+            };
+            
+            const normalizedInput = input.replace(/\s+/g, ' ').trim();
+            
+            for (const [key, value] of Object.entries(commonEquations)) {
+                if (normalizedInput.includes(key) || key.includes(normalizedInput.replace(' → ', ' + ').split(' + ').join(' ').replace(' ', ''))) {
+                    return value;
+                }
+            }
+            
+            return {
+                equation: `${reactants} → ${products}`,
+                explanation: `I've identified your equation, but this specific combination isn't in my database yet. Here's the general approach to balance it:`,
+                steps: [
+                    'Count the atoms of each element on both sides',
+                    'Start with the most complex molecule',
+                    'Balance metals first, then non-metals',
+                    'Balance hydrogen and oxygen last',
+                    'Use coefficients (never change subscripts)',
+                    'Check that all atoms are balanced'
+                ]
+            };
+        }
+
+        // Quiz selector functions
+        function selectDifficulty(difficulty, element, selectorId) {
+            document.querySelectorAll(`[onclick*="selectDifficulty"][onclick*="${selectorId}"]`).forEach(btn => btn.classList.remove('selected'));
+            element.classList.add('selected');
+            document.getElementById(`selectedDifficulty${selectorId}`).value = difficulty;
+            checkQuizSettings(selectorId);
+        }
+
+        function selectQuestionCount(count, element, selectorId) {
+            document.querySelectorAll(`[onclick*="selectQuestionCount"][onclick*="${selectorId}"]`).forEach(btn => btn.classList.remove('selected'));
+            element.classList.add('selected');
+            document.getElementById(`selectedCount${selectorId}`).value = count;
+            checkQuizSettings(selectorId);
+        }
+
+        function checkQuizSettings(selectorId) {
+            const difficulty = document.getElementById(`selectedDifficulty${selectorId}`).value;
+            const count = document.getElementById(`selectedCount${selectorId}`).value;
+            const startBtn = document.getElementById(`startQuizBtn${selectorId}`);
+            startBtn.disabled = !difficulty || !count;
+        }
+
+        function startCustomQuiz(selectorId) {
+            const difficulty = document.getElementById(`selectedDifficulty${selectorId}`).value;
+            const count = parseInt(document.getElementById(`selectedCount${selectorId}`).value);
+            
+            const quizHTML = generateQuiz(difficulty, count);
+            addMessage(quizHTML, 'bot', 'quiz');
+        }
+
+        function generateQuiz(difficulty = 'normal', questionCount = 5) {
+            const quizData = {
+                easy: [
+                    {
+                        question: "What is Avogadro's number?",
+                        options: ["6.022 × 10²³", "6.022 × 10²²", "3.011 × 10²³", "1.204 × 10²⁴"],
+                        correct: 0
+                    },
+                    {
+                        question: "How many atoms are in 1 mole of carbon?",
+                        options: ["6.022 × 10²³", "12", "6", "24"],
+                        correct: 0
+                    },
+                    {
+                        question: "What is the molar mass of water (H₂O)? (H=1, O=16)",
+                        options: ["16 g/mol", "17 g/mol", "18 g/mol", "19 g/mol"],
+                        correct: 2
+                    }
+                ],
+                normal: [
+                    {
+                        question: "How many moles are in 36g of H₂O? (H=1, O=16)",
+                        options: ["1 mole", "2 moles", "3 moles", "4 moles"],
+                        correct: 1
+                    },
+                    {
+                        question: "In 2H₂ + O₂ → 2H₂O, what is the mole ratio of H₂ to H₂O?",
+                        options: ["1:1", "2:1", "1:2", "2:2"],
+                        correct: 0
+                    }
+                ],
+                hard: [
+                    {
+                        question: "Calculate moles of CO₂ from 25g C in C + O₂ → CO₂ (C=12)",
+                        options: ["2.08 mol", "1.04 mol", "3.12 mol", "0.52 mol"],
+                        correct: 0
+                    }
+                ]
+            };
+            
+            const questions = quizData[difficulty] || quizData.normal;
+            const selectedQuestions = questions.slice(0, Math.min(questionCount, questions.length));
+            const quizId = Date.now();
+            
+            let quizHTML = `
+                <div class="quiz-container">
+                    <div class="quiz-header">
+                        <h3>🎯 ${difficulty.toUpperCase()} Quiz (${selectedQuestions.length} Questions)</h3>
+                    </div>
+                    <div class="quiz-content">
+            `;
+            
+            selectedQuestions.forEach((quiz, qIndex) => {
+                quizHTML += `
+                    <div class="quiz-question">${qIndex + 1}. ${quiz.question}</div>
+                    <div class="quiz-options">
+                `;
+                
+                quiz.options.forEach((option, index) => {
+                    quizHTML += `
+                        <button class="quiz-option" onclick="selectQuizOption(${quizId}, ${index}, ${quiz.correct})">
+                            ${String.fromCharCode(65 + index)}. ${option}
+                        </button>
+                    `;
+                });
+                
+                quizHTML += `</div><br>`;
+            });
+            
+            quizHTML += `</div></div>`;
+            
+            return quizHTML;
+        }
+
+        function selectQuizOption(quizId, selected, correct) {
+            const quizContainer = document.querySelector(`[onclick*="${quizId}"]`).closest('.quiz-container');
+            const options = quizContainer.querySelectorAll('.quiz-option');
+            
+            options.forEach((option, index) => {
+                option.onclick = null;
+                if (index === correct) {
+                    option.classList.add('correct');
+                } else if (index === selected && index !== correct) {
+                    option.classList.add('incorrect');
+                }
+            });
+            
+            setTimeout(() => {
+                const feedback = selected === correct ? 
+                    `Correct, ${userProfile.nickname}! 🎉 Great job!` : 
+                    `Not quite right, ${userProfile.nickname}. The correct answer is ${String.fromCharCode(65 + correct)}. Keep practicing! 📚`;
+                addMessage(feedback, 'bot');
+            }, 1000);
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function adjustTextareaHeight(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 100) + 'px';
+        }
+
+        // Enable start button when both fields are filled
+        document.getElementById('nickname').addEventListener('input', function() {
+            const nickname = this.value.trim();
+            const age = document.getElementById('selectedAge').value;
+            document.getElementById('startBtn').disabled = !nickname || !age;
+        });
+
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', initializeApp);
+    </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'99622d148657bc55',t:'MTc2MTczNTY5OS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
